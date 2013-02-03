@@ -1,0 +1,16 @@
+{"a":"123","b":10000}
+[1,2,3,4,5,6]
+{"data":"你好"}
+{"data":"hello"}
+[{"a": 10000},{"b": 20000},{"c": 30000}]
+{"a":[10000,20000,30000]}
+{"a":"My name is \"costaxu\""}
+{"a":"there is a \\ in the text"}
+{"a":"there is a \/ in the text"}
+{"a":"there is a \b in the text"}
+{"a":"there is a \f in the text"}
+{"a":"there is a \n in the text"}
+{"a":"there is a \r in the text"}
+{"a":"there is a \t in the text"}
+{"a":"there is a \a in the text"}
+{"a":""}
