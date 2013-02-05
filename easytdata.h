@@ -22,6 +22,8 @@
 #include <map>
 #include <utility>
 #include <stdio.h>
+#include <exception>
+
 using namespace std;
 
 
@@ -30,47 +32,64 @@ namespace easytdata
 
 typedef enum   EnumEasyTDataType
 {
-    enum_ed_type_int =1,
+    enum_ed_type_int    = 1,
     enum_ed_type_string = 2,
-    enum_ed_type_map = 3,
+    enum_ed_type_map    = 3,
     enum_ed_type_vector = 4, 
-    enum_ed_type_bool = 5,
-    enum_ed_type_none = 6,
-    enum_ed_type_pair = 7,
+    enum_ed_type_bool   = 5,
+    enum_ed_type_none   = 6,
+    enum_ed_type_pair   = 7,
 }enum_ed_type, EnumEasyTDataType, EnumEasyTdataType;
 
-struct _EasyTData;
-typedef struct _EasyTData  _EasyTData, _EasyTdata;
-
-typedef vector<_EasyTdata*> ETVector;
-typedef vector<_EasyTData*>::iterator ETVectorIterator ;
-
-typedef map<string , _EasyTdata*> ETMap;
-typedef ETMap::iterator ETMapIterator,etmiterator;
-
-typedef pair<string, _EasyTdata*> ETPair;
-
-typedef struct _EasyTData
-{
-    enum_ed_type type;
-    union{
-        int         idata;
-        bool        bdata;
-        string  *   sdata;
-        ETVector*   vdata;
-        ETMap   *   mdata;
-        ETPair  *   pdata;
-    }data;    
-} _EasyTData, _EasyTdata;
-
-
-
 class EasyTData;
-typedef EasyTData EasyTdata;
+class EasyTDataException;
+class BasicException;
+class EasyTDataException;
 
-class EasyTData: public _EasyTData
+typedef EasyTData EasyTdata;
+typedef EasyTDataException EasyTdataException,ETException;
+
+typedef vector<EasyTdata*> ETVector;
+typedef ETVector::iterator ETVectorIterator ;
+
+typedef map<string , EasyTdata*> ETMap;
+typedef ETMap::iterator          ETMapIterator,etmiterator;
+
+typedef pair<string, EasyTdata*> ETPair;
+
+
+
+class BasicException: public exception
 {
     public:
+    string m_message;
+    EasyTDataException(const char* pc = "")
+        :m_message(pc)
+    {
+
+    }
+    virtual const char* what()
+    {
+        return m_message.c_str();
+    }
+};
+
+class EasyTDataException: public BasicException
+{};
+
+class EasyTData 
+{
+    public:
+        enum_ed_type type;
+        union{
+            int         idata;
+            bool        bdata;
+            string  *   sdata;
+            ETVector*   vdata;
+            ETMap   *   mdata;
+            ETPair  *   pdata;
+        }data; 
+
         EasyTData(enum_ed_type t= enum_ed_type_none)
         {
             type = t; 
@@ -110,13 +129,18 @@ class EasyTData: public _EasyTData
         }
 
         void Append(const EasyTData& et)
+            throws ETException
         {
             if(this->type == enum_ed_type_vector)
             {
                 EasyTdata * p_et_new = new EasyTData(et);
                 this->data.vdata.push_back(p_et_new);
+                return;
             }
+            throw ETException("EasyTData type error. not a vector");
         }
+
+        void 
 
         EasyTData& operator[](const int i)
         {
@@ -125,7 +149,7 @@ class EasyTData: public _EasyTData
             {
                 return *(this->data.vdata[i]);     
             }
-            throw EasyTDataException("operate [] error");
+            throw EasyTDataException("operate [int] error");
         }
 
         EasyTData& operator[](const char* pc)
@@ -139,7 +163,6 @@ class EasyTData: public _EasyTData
             }
             else
             {
-                
                 this->type = enum_ed_type_map;
                 this->data.vdata = new map<_EasyTData*>;
                 _EasyTData* et = new _EasyTData;
@@ -152,7 +175,7 @@ class EasyTData: public _EasyTData
         }
 
 private :
-        free_data()
+        free()
         {
             switch(this->type)
             {
@@ -165,7 +188,7 @@ private :
                     ETVectorIterator etvi = etv->begin();
                     for(;etvi!=etv->end();etvi++)
                     {
-                        _EasyTData* et = *etvi;
+                        EasyTData* et = *etvi;
                         delete et;
                     }
                     delete etv;
@@ -187,16 +210,6 @@ private :
             }
         }
 };
-
-_EasyTdata* ed_factory_int(int idata);
-_EasyTdata* ed_factory_string(const char* pc);
-_EasyTdata* ed_factory_map();
-_EasyTdata* ed_factory_vector();
-_EasyTdata * ed_factory_bool(bool b);
-_EasyTdata * ed_factory_none();
-_EasyTdata * ed_factory_pair( _EasyTdata* p1, _EasyTdata * p2);
-void ed_vector_add(_EasyTData * ed, _EasyTData * item);
-void ed_map_add(_EasyTData * ed, _EasyTData * item, _EasyTData* value);
 
 #define ed_map_add_pair(ed, pair) ed_map_add(ed, pair->data.pdata->first, pair->data.pdata->second)
 void ed_print(_EasyTData *ed);
