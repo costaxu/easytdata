@@ -12,7 +12,7 @@ json.y.cpp:json.y
 json : json.l.cpp json.y.cpp easytdata.cpp
 	g++  $(CFLAGS) -o$@ $^
 
-test_ed: test_ed.cpp easytdata.cpp
+test_ed: test_ed.cpp easytdata.cpp easytdata.h
 	g++ $(CFLAGS) -o$@ $^
 
 test: test.cpp easytdata.cpp
